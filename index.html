@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shapes proto</title>
+
+  <script src="bower_components/threejs/build/three.min.js"></script>
+  <script src="bower_components/neon/neon-stdlib.min.js"></script>
+
+  <script src="app.js"></script>
+  <script src="shapes.js"></script>
+
+  <script>
+
+    function ready(fn) {
+      if (document.readyState != 'loading'){
+        fn();
+      } else {
+        document.addEventListener('DOMContentLoaded', fn);
+      }
+    }
+    //Kickstart on Document Ready
+    ready(function(){
+      window.threeApp = new ThreeApp({
+
+      });
+      window.app = new Shapes();
+      window.threeApp.appendChild(window.app);
+      window.app.setup();
+      window.threeApp.setup();
+      window.threeApp.animate.call(window.threeApp); //call first animation update
+      window.threeApp.render(document.body);
+    });
+
+  </script>
+
+  <style>
+    html,
+    body{
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #333333;
+    }
+  </style>
+
+</head>
+<body>
+
+</body>
+</html>

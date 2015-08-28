@@ -1,0 +1,7 @@
+{
+  "name": "Project",
+  "description": "Description",
+  "dependencies": {
+    "neon": "git@github.com:escusado/neon.git"
+  }
+}
