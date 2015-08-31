@@ -44,8 +44,8 @@ Class('ThreeApp').inherits(Widget)({
       });
 
       requestAnimationFrame(this.animate.bind(this));
-      // this.renderer.render(this.stage);
-    }
+    },
+
 
   }
 });
