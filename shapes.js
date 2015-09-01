@@ -8,17 +8,18 @@ Class('Shapes').inherits(Widget)({
       this.scene = this.parent.scene;
       this.renderer = this.parent.renderer;
 
+      this.zoomFactor = 1;
+
       this.parent.bind('update', this.update.bind(this));
 
       this.camera = new THREE.PerspectiveCamera(45, this.parent.size.w / this.parent.size.h, 0.1, 20000);
-      this.camera.position.z = 5;
+      this.camera.position.z = 6;
+      this.cameraPosition = this.camera.position.z;
       this.scene.add(this.camera);
 
       this.createElements();
 
       this._bindEvents();
-
-      console.log('????');
     },
 
     resize : function resize(ev){
@@ -53,43 +54,40 @@ Class('Shapes').inherits(Widget)({
           4,5,6,    6,7,4
       ];
 
-      // var geometry =    new THREE.SphereGeometry(1,8,5);
-      var geometry = new THREE.PolyhedronGeometry( verticesOfCube, indicesOfFaces, 6, 2 );
-      var MeshLambertMaterial = new THREE.MeshLambertMaterial({wireframe: true, wireframeLinewidth: 2, vertexColors: THREE.FaceColors, color: 0x00FF00, morphTargets: true});
-      // var vertextMaterial = new THREE.MeshBasicMaterial( { depthWrite: false, transparent: true, opacity: 0.5,color: 0x5B47F3, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
-      this.mesh = new THREE.Mesh( geometry, MeshLambertMaterial );
-      wireframe = new THREE.EdgesHelper( this.mesh, 0x5BFFF3 );
+      var geometry =    new THREE.IcosahedronGeometry(1);
+      // var geometry = new THREE.PolyhedronGeometry( verticesOfCube, indicesOfFaces, 6, 2 );
+      // var MeshLambertMaterial = new THREE.MeshLambertMaterial({wireframe: true, wireframeLinewidth: 2, vertexColors: THREE.FaceColors, color: 0x00FF00, morphTargets: true});
+      var vertextMaterial = new THREE.MeshBasicMaterial( { depthWrite: false, transparent: true, opacity: 0.02,color: 0x5B47F3, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
+      this.mesh = new THREE.Mesh( geometry, vertextMaterial );
+      wireframe = new THREE.EdgesHelper( this.mesh, 0x5B47F3 );
       this.scene.add( wireframe );
       this.mesh.castShadow = true;
       this.mesh.receiveShadow = true;
       this.scene.add( this.mesh );
 
 
-      var geometry2 =    new THREE.IcosahedronGeometry(0.6);
-      var vertextMaterial2 = new THREE.MeshBasicMaterial( { depthWrite: false, transparent: true, opacity: 0.8,color: 0xFFFF00, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
+      var geometry2 =    new THREE.DodecahedronGeometry(0.6);
+      var vertextMaterial2 = new THREE.MeshBasicMaterial( { depthWrite: false, transparent: true, opacity: 0.03,color: 0xFF5555, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
       this.mesh2 = new THREE.Mesh( geometry2, vertextMaterial2 );
-      wireframe2 = new THREE.EdgesHelper( this.mesh2, 0xDDEE55 );
+      wireframe2 = new THREE.EdgesHelper( this.mesh2, 0xFF5555 );
       this.scene.add( wireframe2 );
       this.mesh2.castShadow = true;
       this.mesh2.receiveShadow = true;
       this.scene.add( this.mesh2 );
 
       var geometry3 =    new THREE.TetrahedronGeometry(0.2);
-      var vertextMaterial3 = new THREE.MeshBasicMaterial( { depthWrite: false, transparent: true, opacity: 0.8,color: 0x6AFF1C, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
+      var vertextMaterial3 = new THREE.MeshBasicMaterial( { depthWrite: false, transparent: true, opacity: 0.04,color: 0xFFFF55, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
       this.mesh3 = new THREE.Mesh( geometry3, vertextMaterial3 );
-      wireframe3 = new THREE.EdgesHelper( this.mesh3, 0x2A680B );
+      wireframe3 = new THREE.EdgesHelper( this.mesh3, 0xFFFF55 );
       this.scene.add( wireframe3 );
       this.mesh3.castShadow = true;
       this.mesh3.receiveShadow = true;
       this.scene.add( this.mesh3 );
 
-
-
-      this.scene.fog = new THREE.Fog( 0xFF0000, 0.5, 1000 );
-      // this.scene.fog.color.setHSL( 0.6, 0, 1 );
+      this.scene.fog = new THREE.Fog( 0xFFFFFF, 0.5, 1000 );
 
       hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
-      hemiLight.color.setHSL( 0.6, 1, 0.6 );
+      // hemiLight.color.setHSL( 0.6, 1, 0.6 );
       hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
       hemiLight.position.set( 0, 500, 0 );
       this.scene.add( hemiLight );
@@ -103,16 +101,36 @@ Class('Shapes').inherits(Widget)({
       this.mesh.rotation.x += 0.005;
       this.mesh.rotation.y += 0.005;
 
+      this.zoom(timing);
+
       this.mesh2.rotation.x -= 0.005;
       this.mesh2.rotation.y += 0.005;
 
       this.mesh3.rotation.x -= 0.005;
       this.mesh3.rotation.z += 0.005;
+
+      this.camera.position.z = this.cameraPosition ;
+    },
+
+    zoom : function zoom(timing){
+
+      this.mesh.scale.set( this.zoomFactor, this.zoomFactor, this.zoomFactor );
+      this.camera.position.z = this.cameraPosition;
+
+      if(this.zoomNow){
+        if(this.zoomFactor > 7){
+          return;
+        }
+        this.zoomFactor += timing.dt * 0.005;
+        this.cameraPosition -= timing.dt * 0.003;
+      }
+
+
     },
 
     addFloor : function addFloor(){
       var groundGeo = new THREE.PlaneBufferGeometry( 10000, 10000 );
-      var groundMat = new THREE.MeshPhongMaterial( { color: 0x262B2E, specular: 0x050505 } );
+      var groundMat = new THREE.MeshPhongMaterial( { color: 0xDDDDDD, specular: 0xDDDDDD } );
       // groundMat.color.setHSL( 0.095, 1, 0.75 );
 
       var ground = new THREE.Mesh( groundGeo, groundMat );
@@ -126,7 +144,6 @@ Class('Shapes').inherits(Widget)({
 
     addDirLight : function addDirLight(){
       var dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
-      dirLight.color.setHSL( 0.1, 1, 0.95 );
       dirLight.position.set( -1, 1.75, 1 );
       dirLight.position.multiplyScalar( 50 );
       this.scene.add( dirLight );
@@ -150,6 +167,16 @@ Class('Shapes').inherits(Widget)({
 
 
     _bindEvents : function(){
+
+      document.addEventListener('click', function(){
+        this.zoomNow = true;
+        if(this.zoomFactor > 1){
+          this.zoomFactor = 1;
+          this.zoomNow = false;
+          this.cameraPosition = 6;
+        }
+
+      }.bind(this));
       document.addEventListener('mousemove', this._handleMouseMove.bind(this));
     },
 
